@@ -3,20 +3,20 @@
     <h2>{{ title }}</h2>
     <h4>Number of resources found: {{ numberOfItems }}</h4>
     <div class="row">
-      <div v-bind:key="index" v-for="(col, index) in childCollection">
+      <div v-bind:key="value.title" v-for="value in childCollection">
         <table>
           <tbody>
             <tr>
               <td>Title</td>
-              <td>{{ col.title }}</td>
+              <td>{{ value.title }}</td>
             </tr>
             <tr>
               <td>Description</td>
-              <td>{{ col.description }}</td>
+              <td>{{ value.description }}</td>
             </tr>
             <tr>
               <td>Version</td>
-              <td>{{ col.version }}</td>
+              <td>{{ value.version }}</td>
             </tr>
           </tbody>
         </table>
@@ -123,8 +123,8 @@ export default {
             });
           });
           this.childCollection[rsID] = collections;
-          console.log(collections);
         });
+        console.log(this.childCollection);
       });
       // openFile("https://arche.acdh.oeaw.ac.at/api/139746", (data) => {
       //   const parser = new DOMParser();
