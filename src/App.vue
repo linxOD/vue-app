@@ -1,11 +1,29 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link> |
-    <router-link to="/started">Get Stared</router-link>
-    <router-view />
+  <div class="hfeed site" id="page">
+    <Navbar></Navbar>
+    <div class="container">
+      <router-view />
+    </div>
+    <Footer></Footer>
+    <Imprint></Imprint>
   </div>
 </template>
+
+<script>
+// @ is an alias to /src
+import Navbar from "@/components/Navbar.vue";
+import Footer from "@/components/Footer.vue";
+import Imprint from "@/components/Imprint.vue";
+
+export default {
+  name: "Header",
+  components: {
+    Navbar,
+    Footer,
+    Imprint,
+  },
+};
+</script>
 
 <style>
 #app {
@@ -15,17 +33,14 @@
   text-align: center;
   color: #2c3e50;
 }
-
-#nav {
-  padding: 30px;
+#page {
+  background-color: #f1f1f1;
 }
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.container {
+  padding: 1em;
 }
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+.content {
+  margin: 2em auto;
+  text-align: center;
 }
 </style>

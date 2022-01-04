@@ -9,13 +9,16 @@
   },
   "dependencies": {
     "sass-loader": "^10.2.0",
-    "vue-router": "^3.2.0"
+    "saxon-js": "^2.3.0",
+    "vue-router": "^3.2.0",
+    "xslt3": "^2.3.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-plugin-router": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/eslint-config-prettier": "^6.0.0",
+    "acdh-fundament-vuetify": "^1.1.1",
     "arche-api": "^1.2.1",
     "bootstrap": "^5.1.3",
     "bootstrap-vue": "^2.21.2",

@@ -1,137 +1,25 @@
 <template>
-  <div class="hello">
-    <h2>{{ title }}</h2>
-    <h4>Number of resources found: {{ numberOfItems }}</h4>
-    <div class="row">
-      <div v-bind:key="value.title" v-for="value in childCollection">
-        <table>
-          <tbody>
-            <tr>
-              <td>Title</td>
-              <td>{{ value.title }}</td>
-            </tr>
-            <tr>
-              <td>Description</td>
-              <td>{{ value.description }}</td>
-            </tr>
-            <tr>
-              <td>Version</td>
-              <td>{{ value.version }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <div class="content">
+    <div id="editions-input" />
   </div>
 </template>
 
 <script>
-import {
-  // openFile,
-  ARCHEdownloadResourceIdM2,
-  ARCHErdfQuery,
-} from "arche-api/src";
+const SaxonJS = require("saxon-js");
+const editions = require("../datat/tei-editions.sef.json");
 
 export default {
   name: "GotStarted",
   data() {
     return {
-      title: "",
-      numberOfItems: 0,
-      childCollection: {},
     };
   },
   mounted() {
-    this.$nextTick(() => {
-      const options = {
-        host: "https://arche-curation.acdh-dev.oeaw.ac.at/api",
-        format: "application/n-triples",
-        resourceId: "568102",
-        readMode: "resource",
-      };
-      ARCHEdownloadResourceIdM2(options).then((data) => {
-        const options = {
-          expiry: 14,
-          subject: null,
-          predicate: null,
-          object: null,
-          paginate: false,
-        };
-        var topCol = ARCHErdfQuery(options, data);
-        // console.log(topCol);
-        topCol.value.forEach((el) => {
-          if (el.hasTitle) {
-            var hasTitle = el.hasTitle;
-            this.title = hasTitle.object;
-          }
-          if (el.hasNumberOfItems) {
-            var hasNumberOfItems = el.hasNumberOfItems;
-            var items = hasNumberOfItems.object.replace(
-              "^^http://www.w3.org/2001/XMLSchema#decimal",
-              ""
-            );
-            this.numberOfItems = items;
-          }
-        });
-      });
-      options.readMode = "neighbors";
-      ARCHEdownloadResourceIdM2(options).then((data) => {
-        const options = {
-          expiry: 14,
-          subject: null,
-          predicate: "https://vocabs.acdh.oeaw.ac.at/schema#isPartOf",
-          object: "https://arche-curation.acdh-dev.oeaw.ac.at/api/568102",
-          paginate: false,
-        };
-        var childCol = ARCHErdfQuery(options, data);
-        // console.log(childCol);
-        childCol.value.forEach((el) => {
-          var rsID = `col_${Math.random().toString(16).slice(2)}`;
-          var collections = {};
-          // console.log(el);
-          var id = el.isPartOf.subject.replace(
-            "https://arche-curation.acdh-dev.oeaw.ac.at/api/",
-            ""
-          );
-          const options = {
-            host: "https://arche-curation.acdh-dev.oeaw.ac.at/api",
-            format: "application/n-triples",
-            resourceId: id,
-            readMode: "resource",
-          };
-          ARCHEdownloadResourceIdM2(options).then((data) => {
-            const options = {
-              expiry: 14,
-              subject: null,
-              predicate: null,
-              object: null,
-              paginate: false,
-            };
-            var child_col = ARCHErdfQuery(options, data);
-            // console.log(child_col);
-            child_col.value.forEach((el) => {
-              if (el.hasTitle) {
-                collections["title"] = el.hasTitle.object;
-              }
-              if (el.hasDescription) {
-                collections["description"] = el.hasDescription.object;
-              }
-              if (el.hasVersion) {
-                collections["version"] = el.hasVersion.object;
-              }
-              // console.log(collections);
-            });
-          });
-          this.childCollection[rsID] = collections;
-        });
-        console.log(this.childCollection);
-      });
-      // openFile("https://arche.acdh.oeaw.ac.at/api/139746", (data) => {
-      //   const parser = new DOMParser();
-      //   const xmlDoc = parser.parseFromString(data, "text/xml");
-      //   this.msg = xmlDoc.getElementsByTagName("title")[0].textContent;
-      // });
-    });
+    SaxonJS.transform({
+        stylesheetLocation: editions, // https://tei4arche.acdh-dev.oeaw.ac.at
+        sourceLocation: "https://raw.githubusercontent.com/Auden-Musulin-Papers/amp-data/main/data/editions/amp-transcript__0001.xml",
+        destination: "serialized"
+    }, "async")
   },
 };
 </script>
