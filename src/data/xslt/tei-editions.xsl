@@ -10,11 +10,11 @@
     version="3.0"
     >
 
-    <xsl:import href="partials/osd-container.xsl"/>
-    <xsl:import href="partials/tei-facsimile.xsl"/>
+    <!-- <xsl:import href="partials/osd-container.xsl"/>
+    <xsl:import href="partials/tei-facsimile.xsl"/> -->
 
     <xsl:template match="/">
-        <xsl:result-document href="#editions-input" method="ixsl:replace-content" expand-text="true">
+        <xsl:result-document href="http://localhost:8080/#/started#editions-input" method="ixsl:replace-content" expand-text="true">
             <xsl:apply-templates select="//tei:body" />
         </xsl:result-document>
     </xsl:template>
