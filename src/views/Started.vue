@@ -21,7 +21,11 @@ export default {
       sefJson: []  
     }
   },
-  created() {
+  mounted() {
+    // axios.get("https://service4tei.acdh-dev.oeaw.ac.at/tei2html.xql?tei=https://arche-dev.acdh-dev.oeaw.ac.at/api/37576&xsl=https://github.com/linxOD/vue-app/blob/main/src/data/xslt/tei-editions.xsl")
+    // .then(response => {
+    //   console.log(response.headers);
+    // });
     axios.get('https://raw.githubusercontent.com/Auden-Musulin-Papers/amp-data/main/data/editions/amp-transcript__0001.xml',
      {
       responseType: "text"

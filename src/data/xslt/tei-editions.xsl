@@ -1,14 +1,17 @@
-<xsl:transform
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet 
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:ixsl="http://saxonica.com/ns/interactiveXSLT"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:da="http://declarative.amsterdam/saxonjs"
     xmlns:tei="http://www.tei-c.org/ns/1.0"
-    exclude-result-prefixes="xs"
+    exclude-result-prefixes="#all"
     extension-element-prefixes="ixsl"
     expand-text="yes"
     version="3.0"
     >
+    <xsl:output encoding="UTF-8" media-type="text/html" method="html" version="5.0" indent="yes"/>
 
     <!-- <xsl:import href="partials/osd-container.xsl"/>
     <xsl:import href="partials/tei-facsimile.xsl"/> -->
@@ -132,5 +135,4 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
-</xsl:transform>
-
+</xsl:stylesheet>
