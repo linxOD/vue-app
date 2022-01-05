@@ -13,13 +13,13 @@
     <!-- <xsl:import href="partials/osd-container.xsl"/>
     <xsl:import href="partials/tei-facsimile.xsl"/> -->
 
-    <xsl:template match="/">
+    <!-- <xsl:template match="/">
         <xsl:result-document href="http://localhost:8080/#/started#editions-input" method="ixsl:replace-content" expand-text="true">
             <xsl:apply-templates select="//tei:body" />
         </xsl:result-document>
-    </xsl:template>
+    </xsl:template> -->
 
-    <xsl:template match="tei:body">
+    <xsl:template match="/">
         <xsl:variable name="doc_title">
             <xsl:value-of select=".//tei:title[@level='a'][1]/text()"/>
         </xsl:variable>
@@ -42,11 +42,6 @@
                     <li class="nav-item">
                         <a title="Table" href="#reading-tab" data-toggle="tab" class="nav-link btn btn-round">
                             reading view
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a title="Table" href="#xml-tab" data-toggle="tab" class="nav-link btn btn-round">
-                            TEI/XML view
                         </a>
                     </li>
                 </ul>
@@ -104,15 +99,6 @@
                                 </xsl:for-each>
                             </xsl:for-each-group>
                         </xsl:for-each>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="xml-tab" tabindex="-1">
-                    <div class="card-body">
-                        <iframe frameborder="0" scrolling="yes" width="100%" height="800px">
-                            <xsl:attribute name="src">
-                                <xsl:value-of select="concat('xml-view/',replace(tokenize(base-uri(.),'/')[last()],'.xml','.html'))"/>
-                            </xsl:attribute>
-                        </iframe>
                     </div>
                 </div>
             </div>

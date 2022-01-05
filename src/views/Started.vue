@@ -49,7 +49,8 @@ export default {
           sourceNode: this.xmlItems,
           stylesheetInternal: this.sefJson,
           destination: "serialized"
-        }, "async");
+        }, "async")
+        .then(result => console.log("Transformation result: " + result.principalResult));
       });
     });   
     // .then(result => console.log("Transformation result: " + result.principalResult.toString()))
