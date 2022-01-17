@@ -21,3 +21,9 @@ https://github.com/node-fetch/node-fetch*/
 //         console.log(error);
 //     }    
 // }
+
+module.exports.getFile = async(url) => {
+    const resp = await fetch(url);
+    const data = await resp.text();
+    return data;
+}

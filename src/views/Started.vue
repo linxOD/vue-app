@@ -1,14 +1,17 @@
 <template>
   <div class="gotStarted">
     <GotStarted></GotStarted>
+    <button @click="showData()">Download</button>
+    <div v-html="html"></div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import GotStarted from "@/components/GotStarted.vue";
+import { getFile } from "@/service/request";
 const SaxonJS = require("saxon-js");
-const axios = require('axios');
+// const axios = require('axios');
 
 export default {
   name: "Started",
@@ -18,79 +21,38 @@ export default {
   data() {
     return {
       xmlItems: [],
-      sefJson: []  
-    }
+      sefJson: [],
+      xml: "",
+      json: "",
+      html: "",
+      htmlObject: "",
+    };
   },
   mounted() {
-    // axios.get("https://service4tei.acdh-dev.oeaw.ac.at/tei2html.xql?tei=https://arche-dev.acdh-dev.oeaw.ac.at/api/37576&xsl=https://github.com/linxOD/vue-app/blob/main/src/data/xslt/tei-editions.xsl")
-    // .then(response => {
-    //   console.log(response.headers);
-    // });
-    axios.get('https://raw.githubusercontent.com/Auden-Musulin-Papers/amp-data/main/data/editions/amp-transcript__0001.xml',
-     {
-      responseType: "text"
-     }
-    )
-    .then(response => {
-        // console.log(response.headers)
-        var parser = new DOMParser();
-        var xmlDoc = parser.parseFromString(response.data, "text/xml");
-        this.xmlItems = xmlDoc;        
-    })
-    .then(() => {
-      axios.get('https://raw.githubusercontent.com/linxOD/vue-app/main/src/datat/tei-editions.sef.json',
+    getFile("https://raw.githubusercontent.com/linxOD/vue-app/main/public/tmp/tei-editions.sef.json").then((data) => {
+      // console.log(data);
+      this.json = data;
+    });
+    getFile("https://raw.githubusercontent.com/Auden-Musulin-Papers/amp-data/main/data/editions/amp-transcript__0008.xml").then((data) => {
+      // console.log(data);
+      this.xml = data;
+    });
+  },
+  methods: {
+    showData() {
+      SaxonJS.transform(
         {
-          responseType: "json"
-        }
-      )
-      .then(response => {
-        this.sefJson = response.data;
-      })
-      .then(() => {
-        console.log(this.xmlItems);
-        console.log(this.sefJson);
-        SaxonJS.transform({      
-          sourceNode: this.xmlItems,
-          stylesheetInternal: this.sefJson,
-          destination: "serialized"
-        }, "async")
-        .then(result => console.log("Transformation result: " + result.principalResult));
+          stylesheetText: this.json,
+          sourceText: this.xml,
+          destination: "serialized",
+        },
+        "async"
+      ).then((data) => {
+        this.html = data.principalResult;
+        this.htmlObject = data;
+        console.log(this.htmlObject);
       });
-    });   
-    // .then(result => console.log("Transformation result: " + result.principalResult.toString()))
-    // .catch(err => console.log("Transformation failed: " + err));
-    // axios.get("https://raw.githubusercontent.com/linxOD/vue-app/main/src/datat/tei-editions.sef.json")
-    // .then((response) => {
-    //   console.log(response.data);
-    //   SaxonJS.transform({
-    //     sourceFileName: "https://raw.githubusercontent.com/Auden-Musulin-Papers/amp-data/main/data/editions/amp-transcript__0001.xml",
-    //     stylesheetFileName: response.data,        
-    //     destination: "serialized"
-    //   }, "async");
-    // });
-    // const stylesheetParams = {};
-    // SaxonJS.getResource({
-    //   file: "@/data/editions/amp-transcript__0001.xml",
-    //   type: "xml"
-    // })
-    // .then(doc => {
-    //   stylesheetParams["Q{}lookup-doc"] = doc
-    //   console.log(doc);
-    // })
-    // .then(() => {
-    //   SaxonJS.transform({
-    //     "stylesheetFileName": "https://raw.githubusercontent.com/linxOD/vue-app/main/src/datat/tei-editions.sef.json",
-    //     "stylesheetParams": stylesheetParams,
-    //     "destination": "serialized"
-    //   }, "async");
-    // })
-    // .then(result => console.log("Transformation result: " + result.principalResult.toString()))    
-    // .catch(err => console.log("Transformation failed: " + err));
-    // SaxonJS.transform({
-    //     stylesheetFileName: sef,
-    //     sourceFileName: xml,
-    //     destination: "serialized"
-    // }, "async");
-  }
+    },
+  },
 };
 </script>
