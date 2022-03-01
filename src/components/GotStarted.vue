@@ -41,6 +41,12 @@
               Resource
             </a>
           </span>
+          <span v-if="breadcrumCol.length != 0">
+            |
+            <a :data-key="breadcrumCol" @click="getDataRs" type="resources">
+              load more
+            </a>
+          </span>
         </div>
       </div>
     </div>
@@ -228,8 +234,12 @@ export default {
       breadcrum: "",
       breadcrumCol: "",
       breadcrumRs: "",
-      host: "https://arche-curation.acdh-dev.oeaw.ac.at/api",
-      archeID: "365835",
+      host: "https://arche.acdh.oeaw.ac.at/api",
+      archeID: "140074",
+      // projectSize: 0,
+      paginationStart: 0,
+      paginationEnd: 20,
+      count: 0,
     };
   },
   mounted() {
@@ -284,6 +294,17 @@ export default {
       var element = event.currentTarget;
       var dataKey = element.getAttribute("data-key");
       var type = element.getAttribute("type");
+      console.log(this.count);
+      if (this.count >= 2) {
+        this.paginationStart += 21;
+        this.paginationEnd += 20;
+        // var items = subCols.fullLength;
+        // this.projectSize = Math.ceil(items / 20);
+        console.log(this.paginationStart);
+        console.log(this.paginationEnd);
+      }
+      this.count += 1;
+      console.log(this.count);
       ARCHEdownloadResourceIdM2({
         host: this.host,
         format: "application/n-triples",
@@ -296,7 +317,7 @@ export default {
             subject: null,
             predicate: "https://vocabs.acdh.oeaw.ac.at/schema#isPartOf",
             object: dataKey,
-            paginate: false,
+            paginate: [this.paginationStart, this.paginationEnd],
           },
           rs
         );
@@ -360,6 +381,13 @@ export default {
       });
     },
   },
+  // computed() {
+  //   if (this.projectSize > 20) {
+  //     for (let i = 0; i > this.projectSize; i++) {
+
+  //     }
+  //   }
+  // },
 };
 </script>
 
