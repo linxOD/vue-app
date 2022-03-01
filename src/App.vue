@@ -16,7 +16,7 @@ import Footer from "@/components/Footer.vue";
 import Imprint from "@/components/Imprint.vue";
 
 export default {
-  name: "Header",
+  name: "header-item",
   components: {
     Navbar,
     Footer,

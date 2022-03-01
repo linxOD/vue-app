@@ -9,7 +9,7 @@
 import Navbar from "@/components/Navbar.vue";
 
 export default {
-  name: "Header",
+  name: "header-item",
   components: {
     Navbar,
   },

@@ -1,26 +1,202 @@
 <template>
   <div class="content">
-    <h2>{{ title }}</h2>
-    <h4>Number of resources found: {{ numberOfItems }}</h4>
-    <h3><button @click="getData()">Download</button></h3>
-    <div class="row" v-if="downloaded">
-      <div v-for="value in childCollection" :key="value.title">
-        <table>
-          <tbody>
-            <tr>
-              <td>Title</td>
-              <td>{{ value.title }}</td>
-            </tr>
-            <tr>
-              <td>Description</td>
-              <td>{{ value.description }}</td>
-            </tr>
-            <tr>
-              <td>Version</td>
-              <td>{{ value.version }}</td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- <div class="row">
+      <div class="col">
+        <h3>
+          <button class="btn btn-round bg-light text-light" @click="getData">
+            Download TopCollection
+          </button>
+        </h3>
+      </div>
+    </div> -->
+    <div class="row">
+      <div class="card" v-if="downloaded1">
+        <div class="card-body">
+          <h2>{{ title }}</h2>
+          <h4>Number of resources found: {{ numberOfItems }}</h4>
+          <button
+            class="btn btn-round btn-dark text-light"
+            :data-key="topColIdentifier"
+            type="childCols"
+            @click="getDataRs"
+          >
+            load more data
+          </button>
+        </div>
+        <div class="card-footer" v-if="breadcrum.length != 0">
+          <span v-if="breadcrum.length != 0">
+            <a :data-key="breadcrum" @click="getDataRs" type="childCols">
+              ChildCols
+            </a>
+          </span>
+          <span v-if="breadcrumCol.length != 0">
+            |
+            <a :data-key="breadcrumCol" @click="getDataRs" type="cols">
+              Collection
+            </a>
+          </span>
+          <span v-if="breadcrumRs.length != 0">
+            |
+            <a :data-key="breadcrumRs" @click="getDataRs" type="resources">
+              Resource
+            </a>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div v-if="downloaded">
+        <div class="card" v-for="value in childCollection" :key="value.title">
+          <div class="card-body">
+            <table class="table table-striped table-hover">
+              <tbody>
+                <tr>
+                  <td>Title</td>
+                  <td>{{ value.title }}</td>
+                </tr>
+                <tr>
+                  <td>Description</td>
+                  <td>{{ value.description }}</td>
+                </tr>
+                <tr>
+                  <td>Version</td>
+                  <td>{{ value.version }}</td>
+                </tr>
+                <tr>
+                  <td>Identifier</td>
+                  <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.identifier"
+                      type="cols"
+                      @click="getDataRs"
+                    >
+                      load more
+                    </button>
+                    {{ value.identifier }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Is part of</td>
+                  <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.isPartOf"
+                      type="cols"
+                      @click="getDataRs"
+                    >
+                      load more
+                    </button>
+                    {{ value.isPartOf }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Is newer Version of</td>
+                  <td>{{ value.isNewVersionOf }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div v-if="downloaded2">
+        <div class="card" v-for="value in collections" :key="value.title">
+          <div class="card-body">
+            <table class="table table-striped table-hover">
+              <tbody>
+                <tr>
+                  <td>Title</td>
+                  <td>{{ value.title }}</td>
+                </tr>
+                <tr>
+                  <td>Description</td>
+                  <td>{{ value.description }}</td>
+                </tr>
+                <tr>
+                  <td>Identifier</td>
+                  <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.identifier"
+                      type="resources"
+                      @click="getDataRs"
+                    >
+                      load more
+                    </button>
+                    {{ value.identifier }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Is part of</td>
+                  <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.isPartOf"
+                      type="resources"
+                      @click="getDataRs"
+                    >
+                      {{ value.isPartOf }}
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Is newer Version of</td>
+                  <td>{{ value.isNewVersionOf }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div v-if="downloaded3">
+        <div class="card" v-for="value in resources" :key="value.title">
+          <div class="card-body">
+            <table class="table table-striped table-hover">
+              <tbody>
+                <tr>
+                  <td>Title</td>
+                  <td>{{ value.title }}</td>
+                </tr>
+                <tr>
+                  <td>Description</td>
+                  <td>{{ value.description }}</td>
+                </tr>
+                <tr>
+                  <td>Identifier</td>
+                  <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.identifier"
+                      type="cols4"
+                      @click="getDataRs"
+                    >
+                      load more
+                    </button>
+                    {{ value.identifier }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Is part of</td>
+                  <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.isPartOf"
+                      type="cols4"
+                      @click="getDataRs"
+                    >
+                      load more
+                    </button>
+                    {{ value.isPartOf }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Is newer Version of</td>
+                  <td>{{ value.isNewVersionOf }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -33,110 +209,156 @@ import {
   ARCHErdfQuery,
 } from "arche-api/src";
 
+// import { ARCHEsearchText } from "@/service/request";
+
 export default {
-  name: "GotStarted",
+  name: "got-started",
   data() {
     return {
       title: "",
       numberOfItems: 0,
+      topColIdentifier: "",
       childCollection: [],
+      collections: [],
+      resources: [],
       downloaded: false,
+      downloaded2: false,
+      downloaded3: false,
+      downloaded1: false,
+      breadcrum: "",
+      breadcrumCol: "",
+      breadcrumRs: "",
+      host: "https://arche-curation.acdh-dev.oeaw.ac.at/api",
+      archeID: "365835",
     };
   },
-  methods: {
-    getData() {
-      var options = {
-        host: "https://arche-curation.acdh-dev.oeaw.ac.at/api",
-        format: "application/n-triples",
-        resourceId: "146747",
-        readMode: "resource",
-      };
-      ARCHEdownloadResourceIdM2(options).then((data) => {
-        const options = {
+  mounted() {
+    // var toColID = "365835";
+    this.childCollection = [];
+    ARCHEdownloadResourceIdM2({
+      host: this.host,
+      format: "application/n-triples",
+      resourceId: this.archeID,
+      readMode: "resource",
+    }).then((data) => {
+      var topCol = ARCHErdfQuery(
+        {
           expiry: 14,
           subject: null,
           predicate: null,
           object: null,
           paginate: false,
-        };
-        var topCol = ARCHErdfQuery(options, data);
-        // console.log(topCol);
-        topCol.value.forEach((el) => {
-          if (el.hasTitle) {
-            var hasTitle = el.hasTitle;
-            this.title = hasTitle.object;
+        },
+        data
+      );
+      topCol.value.forEach((el) => {
+        if (el.hasTitle) {
+          var hasTitle = el.hasTitle;
+          this.title = hasTitle.object;
+        }
+        if (el.hasIdentifier) {
+          if (el.hasIdentifier.object.includes("api")) {
+            this.topColIdentifier = el.hasIdentifier.object;
           }
-          if (el.hasNumberOfItems) {
-            var hasNumberOfItems = el.hasNumberOfItems;
-            var items = hasNumberOfItems.object.replace(
-              "^^http://www.w3.org/2001/XMLSchema#decimal",
-              ""
-            );
-            this.numberOfItems = items;
-          }
-        });
-      });
-      var options2 = {
-        host: "https://arche-curation.acdh-dev.oeaw.ac.at/api",
-        format: "application/n-triples",
-        resourceId: "146747",
-        readMode: "neighbors",
-      };
-      ARCHEdownloadResourceIdM2(options2).then((data) => {
-        const options = {
-          expiry: 14,
-          subject: null,
-          predicate: "https://vocabs.acdh.oeaw.ac.at/schema#isPartOf",
-          object: "https://arche-curation.acdh-dev.oeaw.ac.at/api/146747",
-          paginate: false,
-        };
-        var childCol = ARCHErdfQuery(options, data);
-        // console.log(childCol);
-        childCol.value.forEach((el) => {
-          // var rsID = `col_${Math.random().toString(16).slice(2)}`;
-          var collections = {};
-          // console.log(el);
-          var id = el.isPartOf.subject.replace(
-            "https://arche-curation.acdh-dev.oeaw.ac.at/api/",
+        }
+        if (el.hasNumberOfItems) {
+          var hasNumberOfItems = el.hasNumberOfItems;
+          var items = hasNumberOfItems.object.replace(
+            "^^http://www.w3.org/2001/XMLSchema#decimal",
             ""
           );
-          const options = {
-            host: "https://arche-curation.acdh-dev.oeaw.ac.at/api",
-            format: "application/n-triples",
-            resourceId: id,
-            readMode: "resource",
-          };
-          ARCHEdownloadResourceIdM2(options).then((data) => {
-            const options = {
-              expiry: 14,
-              subject: null,
-              predicate: null,
-              object: null,
-              paginate: false,
-            };
-            var child_col = ARCHErdfQuery(options, data);
-            // console.log(child_col);
-            child_col.value.forEach((el) => {
-              if (el.hasTitle) {
-                collections["title"] = el.hasTitle.object;
-              }
-              if (el.hasDescription) {
-                collections["description"] = el.hasDescription.object;
-              }
-              if (el.hasVersion) {
-                collections["version"] = el.hasVersion.object;
-              }
-              // console.log(collections);
-            });
-          });
-          this.childCollection.push(collections);
-        });
-        setTimeout(() => {
-          this.downloaded = true;
-          console.log(this.childCollection);   
-        }, 1000);            
+          this.numberOfItems = items;
+        }
       });
-    }
+      this.downloaded1 = true;
+    });
+  },
+  methods: {
+    getDataRs(event) {
+      this.downloaded = false;
+      this.downloaded2 = false;
+      this.downloaded3 = false;
+      this.childCollection = [];
+      this.collections = [];
+      this.resources = [];
+      var element = event.currentTarget;
+      var dataKey = element.getAttribute("data-key");
+      var type = element.getAttribute("type");
+      ARCHEdownloadResourceIdM2({
+        host: this.host,
+        format: "application/n-triples",
+        resourceId: dataKey.replace(this.host + "/", ""),
+        readMode: "neighbors",
+      }).then((rs) => {
+        var subCols = ARCHErdfQuery(
+          {
+            expiry: 14,
+            subject: null,
+            predicate: "https://vocabs.acdh.oeaw.ac.at/schema#isPartOf",
+            object: dataKey,
+            paginate: false,
+          },
+          rs
+        );
+        subCols.value.forEach((el) => {
+          var res = {};
+          ARCHEdownloadResourceIdM2({
+            host: this.host,
+            format: "application/n-triples",
+            resourceId: el.isPartOf.subject.replace(this.host + "/", ""),
+            readMode: "resource",
+          })
+            .then((data) => {
+              var rss = ARCHErdfQuery(
+                {
+                  expiry: 14,
+                  subject: null,
+                  predicate: null,
+                  object: null,
+                  paginate: false,
+                },
+                data
+              );
+              rss.value.forEach((el) => {
+                if (el.hasTitle) {
+                  res["title"] = el.hasTitle.object;
+                }
+                if (el.hasDescription) {
+                  res["description"] = el.hasDescription.object;
+                }
+                if (el.hasIdentifier) {
+                  if (el.hasIdentifier.object.includes("api")) {
+                    res["identifier"] = el.hasIdentifier.object;
+                  }
+                }
+                if (el.isNewVersionOf) {
+                  res["isNewVersionOf"] = el.isNewVersionOf.object;
+                }
+                if (el.isPartOf) {
+                  res["isPartOf"] = el.isPartOf.object;
+                }
+              });
+            })
+            .then(() => {
+              if (type == "childCols") {
+                this.childCollection.push(res);
+                this.downloaded = true;
+                this.breadcrum = dataKey;
+              }
+              if (type == "cols") {
+                this.collections.push(res);
+                this.downloaded2 = true;
+                this.breadcrumCol = dataKey;
+              }
+              if (type == "resources") {
+                this.resources.push(res);
+                this.downloaded3 = true;
+                this.breadcrumRs = dataKey;
+              }
+            });
+        });
+      });
+    },
   },
 };
 </script>
@@ -167,5 +389,9 @@ td {
 }
 td {
   padding: 0.5em;
+}
+.card-footer span a {
+  cursor: pointer;
+  color: #42b983;
 }
 </style>

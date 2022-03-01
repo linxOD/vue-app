@@ -9,7 +9,7 @@
 import Imprint from "@/components/Imprint.vue";
 
 export default {
-  name: "Imprint",
+  name: "imprint-item",
   components: {
     Imprint,
   },

@@ -19,11 +19,34 @@ https://github.com/node-fetch/node-fetch*/
 //         return callback(body);
 //     } catch (error) {
 //         console.log(error);
-//     }    
+//     }
 // }
 
-module.exports.getFile = async(url) => {
-    const resp = await fetch(url);
-    const data = await resp.text();
-    return data;
-}
+module.exports.getFile = async (url) => {
+  const resp = await fetch(url);
+  const data = await resp.text();
+  return data;
+};
+
+module.exports.ARCHEsearchText = async (id) => {
+  var url =
+    "https://arche-curation.acdh-dev.oeaw.ac.at/api/search?" +
+    new URLSearchParams({
+      "property[0]": "https://vocabs.acdh.oeaw.ac.at/schema#isPartOf",
+      "value[0]": id,
+      "operator[0]": "=",
+    });
+  console.log(url);
+  try {
+    var response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/n-triples",
+      },
+    });
+    var text = await response.text();
+    return text;
+  } catch (error) {
+    console.log(error);
+  }
+};

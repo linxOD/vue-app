@@ -10,6 +10,6 @@
 
 <script>
 export default {
-  name: "Imprint",
+  name: "imprint-item",
 };
 </script>
