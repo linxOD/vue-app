@@ -57,7 +57,7 @@
             <table class="table table-striped table-hover">
               <tbody>
                 <tr>
-                  <td>Title</td>
+                  <td>Title Collections</td>
                   <td>{{ value.title }}</td>
                 </tr>
                 <tr>
@@ -111,7 +111,7 @@
             <table class="table table-striped table-hover">
               <tbody>
                 <tr>
-                  <td>Title</td>
+                  <td>Title Resources</td>
                   <td>{{ value.title }}</td>
                 </tr>
                 <tr>
@@ -160,7 +160,7 @@
             <table class="table table-striped table-hover">
               <tbody>
                 <tr>
-                  <td>Title</td>
+                  <td>Title Resources</td>
                   <td>{{ value.title }}</td>
                 </tr>
                 <tr>
@@ -173,8 +173,8 @@
                     <button
                       class="btn btn-round btn-dark text-light"
                       :data-key="value.identifier"
-                      type="cols4"
-                      @click="getDataRs"
+                      type="resources"
+                      @click="getDataFiles"
                     >
                       load more
                     </button>
@@ -187,12 +187,11 @@
                     <button
                       class="btn btn-round btn-dark text-light"
                       :data-key="value.isPartOf"
-                      type="cols4"
-                      @click="getDataRs"
+                      type="resources"
+                      @click="getDataFiles"
                     >
-                      load more
+                      {{ value.isPartOf }}
                     </button>
-                    {{ value.isPartOf }}
                   </td>
                 </tr>
                 <tr>
@@ -215,7 +214,8 @@ import {
   ARCHErdfQuery,
 } from "arche-api/src";
 
-// import { ARCHEsearchText } from "@/service/request";
+import { getFile } from "@/service/request";
+const SaxonJS = require("saxon-js");
 
 export default {
   name: "got-started",
@@ -240,6 +240,11 @@ export default {
       paginationStart: 0,
       paginationEnd: 20,
       count: 0,
+      editions: "",
+      xml: "",
+      json: "",
+      htmlObject: "",
+      html: "",
     };
   },
   mounted() {
@@ -305,12 +310,84 @@ export default {
       }
       this.count += 1;
       console.log(this.count);
-      ARCHEdownloadResourceIdM2({
-        host: this.host,
-        format: "application/n-triples",
-        resourceId: dataKey.replace(this.host + "/", ""),
-        readMode: "neighbors",
-      }).then((rs) => {
+      if (this.editions.length == 0) {
+        ARCHEdownloadResourceIdM2({
+          host: this.host,
+          format: "application/n-triples",
+          resourceId: dataKey.replace(this.host + "/", ""),
+          readMode: "neighbors",
+        }).then((rs) => {
+          var subCols = ARCHErdfQuery(
+            {
+              expiry: 14,
+              subject: null,
+              predicate: "https://vocabs.acdh.oeaw.ac.at/schema#isPartOf",
+              object: dataKey,
+              paginate: [this.paginationStart, this.paginationEnd],
+            },
+            rs
+          );
+          subCols.value.forEach((el) => {
+            var res = {};
+            ARCHEdownloadResourceIdM2({
+              host: this.host,
+              format: "application/n-triples",
+              resourceId: el.isPartOf.subject.replace(this.host + "/", ""),
+              readMode: "resource",
+            })
+              .then((data) => {
+                var rss = ARCHErdfQuery(
+                  {
+                    expiry: 14,
+                    subject: null,
+                    predicate: null,
+                    object: null,
+                    paginate: false,
+                  },
+                  data
+                );
+                rss.value.forEach((el) => {
+                  if (el.hasTitle) {
+                    res["title"] = el.hasTitle.object;
+                  }
+                  if (el.hasDescription) {
+                    res["description"] = el.hasDescription.object;
+                  }
+                  if (el.hasIdentifier) {
+                    if (el.hasIdentifier.object.includes("api")) {
+                      res["identifier"] = el.hasIdentifier.object;
+                    }
+                  }
+                  if (el.isNewVersionOf) {
+                    res["isNewVersionOf"] = el.isNewVersionOf.object;
+                  }
+                  if (el.isPartOf) {
+                    res["isPartOf"] = el.isPartOf.object;
+                  }
+                });
+              })
+              .then(() => {
+                if (type == "childCols") {
+                  this.childCollection.push(res);
+                  this.downloaded = true;
+                  this.breadcrum = dataKey;
+                }
+                if (type == "cols") {
+                  this.collections.push(res);
+                  this.downloaded2 = true;
+                  this.breadcrumCol = dataKey;
+                  this.editions = rs;
+                }
+                if (type == "resources") {
+                  this.resources.push(res);
+                  this.downloaded3 = true;
+                  this.breadcrumRs = dataKey;
+                  this.editions = rs;
+                }
+              });
+          });
+        });
+      } else {
         var subCols = ARCHErdfQuery(
           {
             expiry: 14,
@@ -319,7 +396,7 @@ export default {
             object: dataKey,
             paginate: [this.paginationStart, this.paginationEnd],
           },
-          rs
+          this.editions
         );
         subCols.value.forEach((el) => {
           var res = {};
@@ -378,7 +455,41 @@ export default {
               }
             });
         });
+      }
+    },
+    getDataFiles(event) {
+      this.html = "";
+      this.htmlObject = "";
+      var element = event.currentTarget;
+      var dataKey = element.getAttribute("data-key");
+      getFile(
+        "https://raw.githubusercontent.com/linxOD/vue-app/main/public/tmp/tei-editions.sef.json"
+      ).then((data) => {
+        // console.log(data);
+        this.json = data;
       });
+      getFile(dataKey)
+        .then((data) => {
+          console.log(data);
+          this.xml = data;
+        })
+        .then(() => {
+          setTimeout(() => {
+            SaxonJS.transform(
+              {
+                stylesheetText: this.json,
+                sourceText: this.xml,
+                destination: "serialized",
+              },
+              "async"
+            ).then((data) => {
+              this.html = data.principalResult;
+              this.htmlObject = data;
+              // console.log(this.htmlObject);
+              this.downloaded3 = true;
+            });
+          }, 100);
+        });
     },
   },
   // computed() {
