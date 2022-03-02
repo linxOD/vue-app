@@ -20,7 +20,7 @@
             type="childCols"
             @click="getDataRs"
           >
-            load collections
+            load more data
           </button>
         </div>
         <div class="card-footer" v-if="breadcrumCol.length != 0">
@@ -37,38 +37,38 @@
           <span v-if="breadcrumRs.length != 0">
             |
             <a :data-key="breadcrumRs" @click="getDataRs" type="resources">
-              Item
+              Resource
             </a>
           </span>
           <span v-if="breadcrumRs.length != 0">
             |
-            <a :data-key="breadcrumRs" @click="getDataRs" type="load more">
-              load more items
+            <a :data-key="breadcrumRs" @click="getDataRs" type="resources">
+              load more
             </a>
           </span>
         </div>
       </div>
     </div>
     <div class="row">
-      <div class="card" v-if="downloaded">
-        <div class="card-body">
-          <div v-for="value in childCollection" :key="value.title">
+      <div v-if="downloaded">
+        <div class="card" v-for="value in childCollection" :key="value.title">
+          <div class="card-body">
             <table class="table table-striped table-hover">
               <tbody>
                 <tr>
-                  <th>Title Collections</th>
+                  <td>Title Collections</td>
                   <td>{{ value.title }}</td>
                 </tr>
                 <tr>
-                  <th>Description</th>
+                  <td>Description</td>
                   <td>{{ value.description }}</td>
                 </tr>
-                <!-- <tr>
+                <tr>
                   <td>Version</td>
                   <td>{{ value.version }}</td>
-                </tr> -->
+                </tr>
                 <tr>
-                  <th>Items</th>
+                  <td>Identifier</td>
                   <td>
                     <button
                       class="btn btn-round btn-dark text-light"
@@ -76,47 +76,49 @@
                       type="resources"
                       @click="getDataRs"
                     >
-                      load
+                      load more
                     </button>
+                    {{ value.identifier }}
                   </td>
                 </tr>
-                <!-- <tr>
+                <tr>
                   <td>Is part of</td>
                   <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.isPartOf"
+                      type="resources"
+                      @click="getDataRs"
+                    >
+                      load more
+                    </button>
                     {{ value.isPartOf }}
                   </td>
-                </tr> -->
-                <!-- <tr>
+                </tr>
+                <tr>
                   <td>Is newer Version of</td>
                   <td>{{ value.isNewVersionOf }}</td>
-                </tr> -->
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
-      <div class="card" v-if="downloaded2">
-        <div class="card-header">
-          <h4>
-            Items loaded: from {{ paginationStart + 1 }} to
-            {{ paginationEnd }} of
-            {{ projectSize }}
-          </h4>
-        </div>
-        <div class="card-body">
-          <div v-for="value in resources" :key="value.title">
+      <div v-if="downloaded2">
+        <div class="card" v-for="value in resources" :key="value.title">
+          <div class="card-body">
             <table class="table table-striped table-hover">
               <tbody>
                 <tr>
-                  <th>Title Resources</th>
+                  <td>Title Resources</td>
                   <td>{{ value.title }}</td>
                 </tr>
                 <tr>
-                  <th>Description</th>
+                  <td>Description</td>
                   <td>{{ value.description }}</td>
                 </tr>
                 <tr>
-                  <th>Item</th>
+                  <td>Identifier</td>
                   <td>
                     <button
                       class="btn btn-round btn-dark text-light"
@@ -124,25 +126,82 @@
                       type="binary"
                       @click="loadxml"
                     >
-                      show
+                      load more
                     </button>
+                    {{ value.identifier }}
                   </td>
                 </tr>
-                <!-- <tr>
+                <tr>
                   <td>Is part of</td>
                   <td>
-                    {{ value.isPartOf }}
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.isPartOf"
+                      type="binary"
+                      @click="loadxml"
+                    >
+                      {{ value.isPartOf }}
+                    </button>
                   </td>
                 </tr>
                 <tr>
                   <td>Is newer Version of</td>
                   <td>{{ value.isNewVersionOf }}</td>
-                </tr> -->
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
+      <!-- <div v-if="downloaded3">
+        <div class="card" v-for="value in resources" :key="value.title">
+          <div class="card-body">
+            <table class="table table-striped table-hover">
+              <tbody>
+                <tr>
+                  <td>Title Resources 2</td>
+                  <td>{{ value.title }}</td>
+                </tr>
+                <tr>
+                  <td>Description</td>
+                  <td>{{ value.description }}</td>
+                </tr>
+                <tr>
+                  <td>Identifier</td>
+                  <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.identifier"
+                      type="resources"
+                      @click="loadxml"
+                    >
+                      load more
+                    </button>
+                    {{ value.identifier }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Is part of</td>
+                  <td>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      :data-key="value.isPartOf"
+                      type="resources"
+                      @click="loadxml"
+                    >
+                      {{ value.isPartOf }}
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Is newer Version of</td>
+                  <td>{{ value.isNewVersionOf }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> -->
       <div v-if="downloaded4">
         <div class="card">
           <div class="card-body">
@@ -172,6 +231,7 @@ export default {
       numberOfItems: 0,
       topColIdentifier: "",
       childCollection: [],
+      collections: [],
       resources: [],
       downloaded: false,
       downloaded2: false,
@@ -183,10 +243,10 @@ export default {
       breadcrumRs: "",
       host: "https://arche.acdh.oeaw.ac.at/api",
       archeID: "140074",
-      projectSize: 0,
+      // projectSize: 0,
       paginationStart: 0,
       paginationEnd: 20,
-      collections: "",
+      count: 0,
       editions: "",
       xml: "",
       json: "",
@@ -237,8 +297,6 @@ export default {
   },
   methods: {
     getDataRs(event) {
-      this.html = "";
-      this.downloaded4 = false;
       this.downloaded = false;
       this.downloaded2 = false;
       // this.downloaded3 = false;
@@ -248,17 +306,18 @@ export default {
       var element = event.currentTarget;
       var dataKey = element.getAttribute("data-key");
       var type = element.getAttribute("type");
-      // console.log(type);
-      if (type == "load more" && this.projectSize > this.paginationEnd) {
+      console.log(type);
+      console.log(this.count);
+      if (type == "resources" && this.count >= 2) {
         this.paginationStart += 20;
         this.paginationEnd += 20;
-        // console.log(this.paginationStart);
-        // console.log(this.paginationEnd);
-        // console.log(this.projectSize);
-      } else {
-        this.paginationStart = 0;
-        this.paginationEnd = 20;
+        // var items = subCols.fullLength;
+        // this.projectSize = Math.ceil(items / 20);
+        console.log(this.paginationStart);
+        console.log(this.paginationEnd);
       }
+      this.count += 1;
+      console.log(this.count);
       if (this.editions.length == 0) {
         ARCHEdownloadResourceIdM2({
           host: this.host,
@@ -276,8 +335,6 @@ export default {
             },
             rs
           );
-          var items = subCols.fullLength;
-          this.projectSize = items;
           subCols.value.forEach((el) => {
             var res = {};
             ARCHEdownloadResourceIdM2({
@@ -322,8 +379,6 @@ export default {
                   this.childCollection.push(res);
                   this.downloaded = true;
                   this.breadcrumCol = dataKey;
-                  this.collections = rs;
-                  this.editions = "";
                 }
                 // if (type == "cols") {
                 //   this.collections.push(res);
@@ -341,11 +396,6 @@ export default {
           });
         });
       } else {
-        if (type == "resources" || type == "load more") {
-          var data = this.editions;
-        } else {
-          data = this.collections;
-        }
         var subCols = ARCHErdfQuery(
           {
             expiry: 14,
@@ -354,7 +404,7 @@ export default {
             object: dataKey,
             paginate: [this.paginationStart, this.paginationEnd],
           },
-          data
+          this.editions
         );
         subCols.value.forEach((el) => {
           var res = {};
@@ -400,8 +450,6 @@ export default {
                 this.childCollection.push(res);
                 this.downloaded = true;
                 this.breadcrumCol = dataKey;
-                this.collections = data;
-                this.editions = "";
               }
               // if (type == "cols") {
               //   this.collections.push(res);
@@ -412,11 +460,6 @@ export default {
                 this.resources.push(res);
                 this.downloaded2 = true;
                 this.breadcrumRs = dataKey;
-                this.editions = data;
-              }
-              if (type == "load more") {
-                this.resources.push(res);
-                this.downloaded2 = true;
               }
             });
         });
@@ -425,7 +468,7 @@ export default {
     loadxml(event) {
       var element = event.currentTarget;
       var dataKey = element.getAttribute("data-key");
-      // console.log(dataKey);
+      console.log(dataKey);
       getFile(
         "https://raw.githubusercontent.com/linxOD/vue-app/main/public/tmp/tei-editions.sef.json"
       ).then((data) => {
@@ -443,6 +486,8 @@ export default {
         this.downloaded2 = false;
         this.downloaded3 = false;
         this.downloaded4 = false;
+        this.childCollection = [];
+        this.collections = [];
         this.resources = [];
         SaxonJS.transform(
           {
@@ -486,13 +531,12 @@ table,
 td {
   text-align: left;
   border: 1px solid lightgrey;
+}
+td {
   padding: 0.5em;
 }
 .card-footer span a {
   cursor: pointer;
   color: #42b983;
-}
-th {
-  width: 30%;
 }
 </style>

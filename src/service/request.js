@@ -22,6 +22,8 @@ https://github.com/node-fetch/node-fetch*/
 //     }
 // }
 
+const { ARCHErdfQuery, ARCHEdownloadResourceIdM2 } = require("arche-api/src");
+
 module.exports.getFile = async (url) => {
   const resp = await fetch(url);
   const data = await resp.text();
@@ -49,4 +51,73 @@ module.exports.ARCHEsearchText = async (id) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+module.exports.getARCHEdata = async (options) => {
+  ARCHEdownloadResourceIdM2({
+    host: options.host,
+    format: "application/n-triples",
+    resourceId: options.key.replace(options.host + "/", ""),
+    readMode: "neighbors",
+  }).then((rs) => {
+    return rs;
+  });
+};
+
+module.exports.parseARCHEdata = (options, data) => {
+  console.log(data);
+  var subCols = ARCHErdfQuery(
+    {
+      expiry: 14,
+      subject: null,
+      predicate: "https://vocabs.acdh.oeaw.ac.at/schema#isPartOf",
+      object: options.key,
+      paginate: [options.paginationStart, options.paginationEnd],
+    },
+    data
+  );
+  subCols.value.forEach((el) => {
+    var res = {};
+    ARCHEdownloadResourceIdM2({
+      host: options.host,
+      format: "application/n-triples",
+      resourceId: el.isPartOf.subject.replace(options.host + "/", ""),
+      readMode: "resource",
+    })
+      .then((rs) => {
+        var rss = ARCHErdfQuery(
+          {
+            expiry: 14,
+            subject: null,
+            predicate: null,
+            object: null,
+            paginate: false,
+          },
+          rs
+        );
+        rss.value.forEach((el) => {
+          if (el.hasTitle) {
+            res["title"] = el.hasTitle.object;
+          }
+          if (el.hasDescription) {
+            res["description"] = el.hasDescription.object;
+          }
+          if (el.hasIdentifier) {
+            if (el.hasIdentifier.object.includes("api")) {
+              res["identifier"] = el.hasIdentifier.object;
+            }
+          }
+          if (el.isNewVersionOf) {
+            res["isNewVersionOf"] = el.isNewVersionOf.object;
+          }
+          if (el.isPartOf) {
+            res["isPartOf"] = el.isPartOf.object;
+          }
+        });
+      })
+      .then(() => {
+        console.log(res);
+        return res;
+      });
+  });
 };
