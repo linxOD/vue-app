@@ -125,11 +125,17 @@
                       class="btn btn-round btn-dark text-light"
                       :data-key="value.identifier"
                       type="resources"
-                      @click="getDataRs"
+                      @click="getDataFiles"
                     >
                       load more
                     </button>
                     {{ value.identifier }}
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      @click="showData"
+                    >
+                      show data
+                    </button>
                   </td>
                 </tr>
                 <tr>
@@ -139,9 +145,15 @@
                       class="btn btn-round btn-dark text-light"
                       :data-key="value.isPartOf"
                       type="resources"
-                      @click="getDataRs"
+                      @click="getDataFiles"
                     >
                       {{ value.isPartOf }}
+                    </button>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      @click="showData"
+                    >
+                      show data
                     </button>
                   </td>
                 </tr>
@@ -160,7 +172,7 @@
             <table class="table table-striped table-hover">
               <tbody>
                 <tr>
-                  <td>Title Resources</td>
+                  <td>Title Resources 2</td>
                   <td>{{ value.title }}</td>
                 </tr>
                 <tr>
@@ -179,6 +191,12 @@
                       load more
                     </button>
                     {{ value.identifier }}
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      @click="showData"
+                    >
+                      show data
+                    </button>
                   </td>
                 </tr>
                 <tr>
@@ -192,6 +210,12 @@
                     >
                       {{ value.isPartOf }}
                     </button>
+                    <button
+                      class="btn btn-round btn-dark text-light"
+                      @click="showData"
+                    >
+                      show data
+                    </button>
                   </td>
                 </tr>
                 <tr>
@@ -200,6 +224,13 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+      <div v-if="downloaded4">
+        <div class="card">
+          <div class="card-body">
+            <div v-html="html" />
           </div>
         </div>
       </div>
@@ -215,7 +246,7 @@ import {
 } from "arche-api/src";
 
 import { getFile } from "@/service/request";
-const SaxonJS = require("saxon-js");
+import * as SaxonJS from "../vendor/saxon-js/SaxonJS2.rt";
 
 export default {
   name: "got-started",
@@ -231,6 +262,7 @@ export default {
       downloaded2: false,
       downloaded3: false,
       downloaded1: false,
+      downloaded4: false,
       breadcrum: "",
       breadcrumCol: "",
       breadcrumRs: "",
@@ -458,38 +490,45 @@ export default {
       }
     },
     getDataFiles(event) {
-      this.html = "";
-      this.htmlObject = "";
       var element = event.currentTarget;
       var dataKey = element.getAttribute("data-key");
       getFile(
         "https://raw.githubusercontent.com/linxOD/vue-app/main/public/tmp/tei-editions.sef.json"
       ).then((data) => {
-        // console.log(data);
+        console.log(data);
         this.json = data;
       });
       getFile(dataKey)
         .then((data) => {
           console.log(data);
           this.xml = data;
-        })
-        .then(() => {
-          setTimeout(() => {
-            SaxonJS.transform(
-              {
-                stylesheetText: this.json,
-                sourceText: this.xml,
-                destination: "serialized",
-              },
-              "async"
-            ).then((data) => {
-              this.html = data.principalResult;
-              this.htmlObject = data;
-              // console.log(this.htmlObject);
-              this.downloaded3 = true;
-            });
-          }, 100);
         });
+    },
+    showData() {
+      this.html = "";
+      this.htmlObject = "";
+      this.downloaded = false;
+      this.downloaded2 = false;
+      this.downloaded3 = false;
+      this.downloaded4 = false;
+      this.childCollection = [];
+      this.collections = [];
+      this.resources = [];
+      setTimeout(() => {
+        SaxonJS.transform(
+          {
+            stylesheetText: this.json,
+            sourceText: this.xml,
+            destination: "serialized",
+          },
+          "async"
+        ).then((data) => {
+          this.html = data.principalResult;
+          this.htmlObject = data;
+          // console.log(this.htmlObject);
+          this.downloaded4 = true;
+        });
+      }, 100);
     },
   },
   // computed() {
