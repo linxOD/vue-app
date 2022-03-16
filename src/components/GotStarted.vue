@@ -17,7 +17,8 @@
           <button
             class="btn btn-round btn-dark text-light"
             :data-key="topColIdentifier"
-            type="childCols"
+            type="Collection"
+            data-type="Collection"
             @click="getDataRs"
           >
             load collections
@@ -30,19 +31,34 @@
             </a>
           </span> -->
           <span v-if="breadcrumCol.length != 0">
-            <a :data-key="topColIdentifier" @click="getDataRs" type="childCols">
+            <a
+              :data-key="topColIdentifier"
+              @click="getDataRs"
+              type="Collection"
+              data-type="Collection"
+            >
               Collection
             </a>
           </span>
           <span v-if="breadcrumRs.length != 0">
             |
-            <a :data-key="breadcrumRs" @click="getDataRs" type="resources">
+            <a
+              :data-key="breadcrumRs"
+              @click="getDataRs"
+              type="Resource"
+              data-type="Resource"
+            >
               Item
             </a>
           </span>
           <span v-if="breadcrumRs.length != 0">
             |
-            <a :data-key="breadcrumRs" @click="getDataRs" type="load more">
+            <a
+              :data-key="breadcrumRs"
+              @click="getDataRs"
+              type="Resource"
+              data-type="load more"
+            >
               load more items
             </a>
           </span>
@@ -50,96 +66,42 @@
       </div>
     </div>
     <div class="row">
-      <div class="card" v-if="downloaded">
-        <div class="card-body">
-          <div v-for="value in childCollection" :key="value.title">
-            <table class="table table-striped table-hover">
-              <tbody>
-                <tr>
-                  <th>Title Collections</th>
-                  <td>{{ value.title }}</td>
-                </tr>
-                <tr>
-                  <th>Description</th>
-                  <td>{{ value.description }}</td>
-                </tr>
-                <!-- <tr>
-                  <td>Version</td>
-                  <td>{{ value.version }}</td>
-                </tr> -->
-                <tr>
-                  <th>Items</th>
-                  <td>
-                    <button
-                      class="btn btn-round btn-dark text-light"
-                      :data-key="value.identifier"
-                      type="resources"
-                      @click="getDataRs"
-                    >
-                      load
-                    </button>
-                  </td>
-                </tr>
-                <!-- <tr>
-                  <td>Is part of</td>
-                  <td>
-                    {{ value.isPartOf }}
-                  </td>
-                </tr> -->
-                <!-- <tr>
-                  <td>Is newer Version of</td>
-                  <td>{{ value.isNewVersionOf }}</td>
-                </tr> -->
-              </tbody>
-            </table>
+      <div v-for="value in childCollection" :key="value.identifier">
+        <div class="card">
+          <div class="card-body">
+            <h3>{{ value.title }}</h3>
+            <p>{{ value.description }}</p>
+            <button
+              class="btn btn-round btn-dark text-light"
+              :data-key="value.identifier"
+              :type="value.type"
+              :data-type="value.type"
+              @click="getDataRs"
+            >
+              load_{{ value.identifier }}
+            </button>
           </div>
         </div>
       </div>
-      <div class="card" v-if="downloaded2">
-        <div class="card-header">
-          <h4>
-            Items loaded: from {{ paginationStart + 1 }} to
-            {{ paginationEnd }} of
-            {{ projectSize }}
-          </h4>
-        </div>
-        <div class="card-body">
-          <div v-for="value in resources" :key="value.title">
-            <table class="table table-striped table-hover">
-              <tbody>
-                <tr>
-                  <th>Title Resources</th>
-                  <td>{{ value.title }}</td>
-                </tr>
-                <tr>
-                  <th>Description</th>
-                  <td>{{ value.description }}</td>
-                </tr>
-                <tr>
-                  <th>Item</th>
-                  <td>
-                    <button
-                      class="btn btn-round btn-dark text-light"
-                      :data-key="value.identifier"
-                      type="binary"
-                      @click="loadxml"
-                    >
-                      show
-                    </button>
-                  </td>
-                </tr>
-                <!-- <tr>
-                  <td>Is part of</td>
-                  <td>
-                    {{ value.isPartOf }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Is newer Version of</td>
-                  <td>{{ value.isNewVersionOf }}</td>
-                </tr> -->
-              </tbody>
-            </table>
+      <div>
+        <h4>
+          Items loaded: from {{ paginationStart + 1 }} to {{ paginationEnd }} of
+          {{ projectSize }}
+        </h4>
+      </div>
+      <div v-for="value in resources" :key="value.identifier">
+        <div class="card">
+          <div class="card-body">
+            <h3>{{ value.title }}</h3>
+            <button
+              class="btn btn-round btn-dark text-light"
+              :data-key="value.identifier"
+              type="binary"
+              data-type="binary"
+              @click="loadxml"
+            >
+              show_{{ value.identifier }}
+            </button>
           </div>
         </div>
       </div>
@@ -248,8 +210,10 @@ export default {
       var element = event.currentTarget;
       var dataKey = element.getAttribute("data-key");
       var type = element.getAttribute("type");
+      var dataType = element.getAttribute("data-type");
+      console.log(type);
       // console.log(type);
-      if (type == "load more" && this.projectSize > this.paginationEnd) {
+      if (dataType == "load more" && this.projectSize > this.paginationEnd) {
         this.paginationStart += 20;
         this.paginationEnd += 20;
         // console.log(this.paginationStart);
@@ -266,6 +230,11 @@ export default {
           resourceId: dataKey.replace(this.host + "/", ""),
           readMode: "neighbors",
         }).then((rs) => {
+          if (type == "Resource") {
+            this.editions = rs;
+          } else if (type == "Collection") {
+            this.collections = rs;
+          }
           var subCols = ARCHErdfQuery(
             {
               expiry: 14,
@@ -280,6 +249,7 @@ export default {
           this.projectSize = items;
           subCols.value.forEach((el) => {
             var res = {};
+            var cols = {};
             ARCHEdownloadResourceIdM2({
               host: this.host,
               format: "application/n-triples",
@@ -298,52 +268,111 @@ export default {
                   data
                 );
                 rss.value.forEach((el) => {
-                  if (el.hasTitle) {
-                    res["title"] = el.hasTitle.object;
-                  }
-                  if (el.hasDescription) {
-                    res["description"] = el.hasDescription.object;
-                  }
-                  if (el.hasIdentifier) {
-                    if (el.hasIdentifier.object.includes("api")) {
-                      res["identifier"] = el.hasIdentifier.object;
-                    }
-                  }
-                  if (el.isNewVersionOf) {
-                    res["isNewVersionOf"] = el.isNewVersionOf.object;
-                  }
-                  if (el.isPartOf) {
-                    res["isPartOf"] = el.isPartOf.object;
+                  if (el.type) {
+                    type = el.type.object.replace(
+                      "https://vocabs.acdh.oeaw.ac.at/schema#",
+                      ""
+                    );
                   }
                 });
+                if (type == "Resource") {
+                  rss.value.forEach((el) => {
+                    console.log(type);
+                    if (el.type) {
+                      res["type"] = el.type.object.replace(
+                        "https://vocabs.acdh.oeaw.ac.at/schema#",
+                        ""
+                      );
+                    }
+                    if (el.hasTitle) {
+                      res["title"] = el.hasTitle.object;
+                    }
+                    if (el.hasDescription) {
+                      res["description"] = el.hasDescription.object;
+                    }
+                    if (el.hasIdentifier) {
+                      if (el.hasIdentifier.object.includes("api")) {
+                        res["identifier"] = el.hasIdentifier.object;
+                        console.log(el.hasIdentifier.object);
+                      }
+                    }
+                    if (el.isNewVersionOf) {
+                      res["isNewVersionOf"] = el.isNewVersionOf.object;
+                    }
+                    if (el.isPartOf) {
+                      res["isPartOf"] = el.isPartOf.object;
+                    }
+                    console.log(res);
+                  });
+                } else if (type == "Collection") {
+                  rss.value.forEach((el) => {
+                    console.log(type);
+                    if (el.type) {
+                      cols["type"] = el.type.object.replace(
+                        "https://vocabs.acdh.oeaw.ac.at/schema#",
+                        ""
+                      );
+                    } else if (el.hasTitle) {
+                      cols["title"] = el.hasTitle.object;
+                    } else if (el.hasDescription) {
+                      cols["description"] = el.hasDescription.object;
+                    } else if (el.hasIdentifier) {
+                      if (el.hasIdentifier.object.includes("api")) {
+                        cols["identifier"] = el.hasIdentifier.object;
+                        console.log(el.hasIdentifier.object);
+                      }
+                    } else if (el.isNewVersionOf) {
+                      cols["isNewVersionOf"] = el.isNewVersionOf.object;
+                    } else if (el.isPartOf) {
+                      cols["isPartOf"] = el.isPartOf.object;
+                    }
+                    console.log(cols);
+                  });
+                }
               })
               .then(() => {
-                if (type == "childCols") {
-                  this.childCollection.push(res);
+                this.childCollection.push(cols);
+                this.resources.push(res);
+                if (dataType == "Collection") {
                   this.downloaded = true;
                   this.breadcrumCol = dataKey;
                   this.collections = rs;
-                  this.editions = "";
+                  console.log(this.childCollectionpe);
                 }
-                // if (type == "cols") {
-                //   this.collections.push(res);
-                //   this.downloaded2 = true;
-                //   this.breadcrumCol = dataKey;
-                //   this.editions = rs;
-                // }
-                if (type == "resources") {
-                  this.resources.push(res);
+                if (dataType == "Resource") {
                   this.downloaded2 = true;
                   this.breadcrumRs = dataKey;
                   this.editions = rs;
+                  console.log(this.resources);
                 }
+                // this.editions = rs;
+                // if (type == "childCols") {
+                //   this.childCollection.push(res);
+                //   this.downloaded = true;
+                //   this.breadcrumCol = dataKey;
+                //   this.collections = rs;
+                //   this.editions = "";
+                // }
+                // if (type == "Collection") {
+                //   this.childCollection.push(res);
+                //   this.downloaded = true;
+                //   this.breadcrumCol = dataKey;
+                //   this.collections = rs;
+                //   this.editions = "";
+                // }
+                // if (type == "Resource") {
+                //   this.resources.push(res);
+                //   this.downloaded2 = true;
+                //   this.breadcrumRs = dataKey;
+                //   this.editions = rs;
+                // }
               });
           });
         });
       } else {
-        if (type == "resources" || type == "load more") {
+        if (type == "Resource" || dataType == "load more") {
           var data = this.editions;
-        } else {
+        } else if (type == "Collection") {
           data = this.collections;
         }
         var subCols = ARCHErdfQuery(
@@ -358,6 +387,7 @@ export default {
         );
         subCols.value.forEach((el) => {
           var res = {};
+          var cols = {};
           ARCHEdownloadResourceIdM2({
             host: this.host,
             format: "application/n-triples",
@@ -376,53 +406,122 @@ export default {
                 data
               );
               rss.value.forEach((el) => {
-                if (el.hasTitle) {
-                  res["title"] = el.hasTitle.object;
-                }
-                if (el.hasDescription) {
-                  res["description"] = el.hasDescription.object;
-                }
-                if (el.hasIdentifier) {
-                  if (el.hasIdentifier.object.includes("api")) {
-                    res["identifier"] = el.hasIdentifier.object;
-                  }
-                }
-                if (el.isNewVersionOf) {
-                  res["isNewVersionOf"] = el.isNewVersionOf.object;
-                }
-                if (el.isPartOf) {
-                  res["isPartOf"] = el.isPartOf.object;
+                if (el.type) {
+                  type = el.type.object.replace(
+                    "https://vocabs.acdh.oeaw.ac.at/schema#",
+                    ""
+                  );
                 }
               });
+              if (type == "Resource") {
+                rss.value.forEach((el) => {
+                  console.log(type);
+                  if (el.type) {
+                    res["type"] = el.type.object.replace(
+                      "https://vocabs.acdh.oeaw.ac.at/schema#",
+                      ""
+                    );
+                  }
+                  if (el.hasTitle) {
+                    res["title"] = el.hasTitle.object;
+                  }
+                  if (el.hasDescription) {
+                    res["description"] = el.hasDescription.object;
+                  }
+                  if (el.hasIdentifier) {
+                    if (el.hasIdentifier.object.includes("api")) {
+                      res["identifier"] = el.hasIdentifier.object;
+                      console.log(el.hasIdentifier.object);
+                    }
+                  }
+                  if (el.isNewVersionOf) {
+                    res["isNewVersionOf"] = el.isNewVersionOf.object;
+                  }
+                  if (el.isPartOf) {
+                    res["isPartOf"] = el.isPartOf.object;
+                  }
+                  console.log(res);
+                });
+              } else if (type == "Collection") {
+                rss.value.forEach((el) => {
+                  console.log(type);
+                  if (el.type) {
+                    cols["type"] = el.type.object.replace(
+                      "https://vocabs.acdh.oeaw.ac.at/schema#",
+                      ""
+                    );
+                  } else if (el.hasTitle) {
+                    cols["title"] = el.hasTitle.object;
+                  } else if (el.hasDescription) {
+                    cols["description"] = el.hasDescription.object;
+                  } else if (el.hasIdentifier) {
+                    if (el.hasIdentifier.object.includes("api")) {
+                      cols["identifier"] = el.hasIdentifier.object;
+                      console.log(el.hasIdentifier.object);
+                    }
+                  } else if (el.isNewVersionOf) {
+                    cols["isNewVersionOf"] = el.isNewVersionOf.object;
+                  } else if (el.isPartOf) {
+                    cols["isPartOf"] = el.isPartOf.object;
+                  }
+                  console.log(cols);
+                });
+              }
             })
             .then(() => {
-              if (type == "childCols") {
-                this.childCollection.push(res);
+              this.resources.push(res);
+              this.childCollection.push(cols);
+              if (dataType == "Collection") {
                 this.downloaded = true;
                 this.breadcrumCol = dataKey;
                 this.collections = data;
-                this.editions = "";
               }
-              // if (type == "cols") {
-              //   this.collections.push(res);
-              //   this.downloaded2 = true;
-              //   this.breadcrumCol = dataKey;
-              // }
-              if (type == "resources") {
-                this.resources.push(res);
+              if (dataType == "Resource") {
                 this.downloaded2 = true;
                 this.breadcrumRs = dataKey;
                 this.editions = data;
               }
-              if (type == "load more") {
-                this.resources.push(res);
+              if (dataType == "load more") {
                 this.downloaded2 = true;
               }
+              console.log(this.childCollection);
+              console.log(this.resources);
+              // if (type == "childCols") {
+              //   this.childCollection.push(res);
+              //   this.downloaded = true;
+              //   this.breadcrumCol = dataKey;
+              //   this.collections = data;
+              //   this.editions = "";
+              // }
+              // if (type == "Collection") {
+              //   this.childCollection.push(res);
+              //   this.downloaded = true;
+              //   this.breadcrumCol = dataKey;
+              //   this.collections = data;
+              //   this.editions = "";
+              // }
+              // if (type == "Resource") {
+              //   this.resources.push(res);
+              //   this.downloaded2 = true;
+              //   this.breadcrumRs = dataKey;
+              //   this.editions = data;
+              // }
+              // if (type == "load more") {
+              //   this.resources.push(res);
+              //   this.downloaded2 = true;
+              // }
             });
         });
       }
     },
     loadxml(event) {
+      this.html = "";
+      this.htmlObject = "";
+      this.downloaded = false;
+      this.downloaded2 = false;
+      this.downloaded3 = false;
+      this.downloaded4 = false;
+      this.resources = [];
       var element = event.currentTarget;
       var dataKey = element.getAttribute("data-key");
       // console.log(dataKey);
@@ -437,13 +536,6 @@ export default {
         this.xml = data;
       });
       setTimeout(() => {
-        this.html = "";
-        this.htmlObject = "";
-        this.downloaded = false;
-        this.downloaded2 = false;
-        this.downloaded3 = false;
-        this.downloaded4 = false;
-        this.resources = [];
         SaxonJS.transform(
           {
             stylesheetText: this.json,
